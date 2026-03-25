@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QuizApp – Play</title>
+  <!-- ⚡ ADD THIS LINE — Emoji favicon, no image file needed -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body class="quiz-body">
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-dark bg-dark shadow">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-4" href="index.html">
+        <i class="bi bi-lightning-charge-fill text-warning"></i> QuizApp
+      </a>
+      <a href="index.html" class="btn btn-outline-light btn-sm">
+        <i class="bi bi-house-fill"></i> Home
+      </a>
+    </div>
+  </nav>
+
+  <div class="container py-5">
+
+    <!-- ======================================================
+         STEP 1: SETUP FORM
+         User picks category (Java/Python), number of questions
+         and enters a quiz title. Then clicks "Create & Start".
+    ====================================================== -->
+    <div id="setupSection" class="quiz-card mx-auto">
+      <div class="text-center mb-4">
+        <div class="quiz-icon mb-3">🎯</div>
+        <h2 class="fw-bold">Create Your Quiz</h2>
+        <p class="text-muted">Pick a category and start your challenge!</p>
+      </div>
+
+      <!-- Error box (hidden by default, shown if something goes wrong) -->
+      <div id="setupError" class="alert alert-danger d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span id="setupErrorMsg">Something went wrong.</span>
+      </div>
+
+      <!-- Quiz Title -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Quiz Title</label>
+        <input
+          type="text"
+          id="quizTitle"
+          class="form-control form-control-lg"
+          placeholder="e.g. My Java Quiz"
+        />
+      </div>
+
+      <!-- Category Dropdown — only Java and Python -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Category</label>
+        <select id="quizCategory" class="form-select form-select-lg">
+          <!--
+            The "value" here MUST match exactly what's stored in the database.
+            After running database_fix.sql, both will be stored as "Java" and "Python"
+          -->
+          <option value="">-- Select a Category --</option>
+          <option value="Java">☕ Java</option>
+          <option value="Python">🐍 Python</option>
+        </select>
+      </div>
+
+      <!-- Number of Questions -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Number of Questions</label>
+        <select id="numQuestions" class="form-select form-select-lg">
+          <option value="5">5 Questions</option>
+          <option value="10" selected>10 Questions</option>
+          <option value="15">15 Questions</option>
+        </select>
+      </div>
+
+      <button
+        id="createQuizBtn"
+        class="btn btn-warning btn-lg w-100 fw-bold"
+        onclick="createQuiz()"
+      >
+        <i class="bi bi-play-fill"></i> Create &amp; Start Quiz
+      </button>
+    </div>
+
+    <!-- ======================================================
+         STEP 2: QUESTIONS
+         Hidden at first. JavaScript shows this and fills in
+         the questions after the quiz is created.
+    ====================================================== -->
+    <div id="questionsSection" class="d-none">
+
+      <!-- Quiz header -->
+      <div class="text-center mb-4">
+        <h2 class="fw-bold" id="quizTitleDisplay"></h2>
+        <p class="text-muted" id="quizSubtitle"></p>
+      </div>
+
+      <!-- Question cards will be injected here by JavaScript -->
+      <div id="questionsContainer"></div>
+
+      <!-- Submit button -->
+      <div class="text-center mt-4 mb-5">
+        <button class="btn btn-warning btn-lg fw-bold px-5" onclick="submitQuiz()">
+          <i class="bi bi-send-fill"></i> Submit Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- ======================================================
+         STEP 3: RESULT
+         Hidden at first. JavaScript shows this after submitting.
+    ====================================================== -->
+    <div id="resultSection" class="d-none">
+      <div class="quiz-card mx-auto text-center">
+
+        <div class="result-icon mb-3" id="resultIcon">🎉</div>
+        <h2 class="fw-bold mb-2" id="resultTitle">Quiz Complete!</h2>
+        <p class="text-muted mb-4" id="resultSubtitle">Here's how you did:</p>
+
+        <!-- Score numbers -->
+        <div class="score-display mb-4">
+          <div class="score-number" id="scoreDisplay">0</div>
+          <div class="score-label" id="scoreLabelDisplay">out of 0</div>
+        </div>
+
+        <!-- Score percentage bar -->
+        <div class="mb-4">
+          <div class="d-flex justify-content-between mb-1">
+            <small class="text-muted">Your Score</small>
+            <small class="fw-bold" id="scorePercent">0%</small>
+          </div>
+          <div class="progress" style="height:12px; border-radius:20px;">
+            <div
+              id="scoreBar"
+              class="progress-bar progress-bar-striped"
+              role="progressbar"
+              style="width:0%; border-radius:20px;"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Result message (changes color based on score) -->
+        <div class="alert mb-4" id="resultAlert">
+          <strong id="resultMessage"></strong>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <button class="btn btn-warning fw-bold px-4" onclick="resetQuiz()">
+            <i class="bi bi-arrow-repeat"></i> Try Again
+          </button>
+          <a href="index.html" class="btn btn-outline-dark fw-bold px-4">
+            <i class="bi bi-house-fill"></i> Home
+          </a>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOADING SPINNER OVERLAY -->
+  <div id="loadingOverlay" class="loading-overlay d-none">
+    <div class="text-center text-white">
+      <div class="spinner-border text-warning mb-3" style="width:3rem; height:3rem;" role="status"></div>
+      <div class="fw-semibold fs-5" id="loadingMsg">Loading...</div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
