@@ -307,7 +307,8 @@ function showSetupError(message) {
 }
 
 function showLoading(message) {
-  document.getElementById("loadingMsg").textContent = message || "Loading...";
+  document.getElementById("loadingMsg").innerHTML =
+    message + "<br><small>⚠️ First request may take up to 1 minute (Render free tier)</small>";
   document.getElementById("loadingOverlay").classList.remove("d-none");
 }
 
